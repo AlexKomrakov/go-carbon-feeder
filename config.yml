@@ -1,0 +1,6 @@
+interval: 10
+command:
+  name: bash
+  arguments:
+    - -c
+    - top -b -n1 | grep "Cpu(s)" | awk '{print $2 + $4}'

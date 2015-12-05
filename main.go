@@ -2,13 +2,22 @@ package main
 
 import (
 	"fmt"
-	"log"
 )
 
+
+
 func main() {
-	out, err := Command{`bash`, [2]string{`-c`, `top -b -n1 | grep "Cpu(s)" | awk '{print $2 + $4}'`}}.Run()
+
+
+	config, err := Config{}.FromYml("config.yml")
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
-	fmt.Printf("The date is %s\n", out)
+
+	out, err := config.Command.Run()
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("Result: %s\n", out)
 }
