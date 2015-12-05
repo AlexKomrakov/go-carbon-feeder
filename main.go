@@ -3,12 +3,10 @@ package main
 import (
 	"fmt"
 	"log"
-	"os/exec"
 )
 
 func main() {
-	command := `top -b -n1 | grep "Cpu(s)" | awk '{print $2 + $4}'`
-	out, err := exec.Command("bash", "-c", command).Output()
+	out, err := Command{`bash`, [2]string{`-c`, `top -b -n1 | grep "Cpu(s)" | awk '{print $2 + $4}'`}}.Run()
 	if err != nil {
 		log.Fatal(err)
 	}
