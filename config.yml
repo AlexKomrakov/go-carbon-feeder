@@ -1,6 +1,14 @@
 interval: 10
-command:
-  name: bash
-  arguments:
-    - -c
-    - top -b -n1 | grep "Cpu(s)" | awk '{print $2 + $4}'
+metric:
+  - key: memory_used
+    value:
+      name: bash
+      arguments:
+        - -c
+        - free -m | awk 'NR==2{printf "%s\n", $3 }'
+  - key: memory_total
+    value:
+      name: bash
+      arguments:
+        - -c
+        - free -m | awk 'NR==2{printf "%s\n", $2 }'

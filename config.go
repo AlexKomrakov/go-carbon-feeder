@@ -3,11 +3,12 @@ package main
 import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"time"
 )
 
 type Config struct {
-	Interval int
-	Command
+	Interval time.Duration
+	Metric []Metric
 }
 
 func (c Config) FromYml(file string) (Config, error) {
