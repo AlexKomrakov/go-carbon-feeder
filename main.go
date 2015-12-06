@@ -3,9 +3,17 @@ package main
 import (
 	"fmt"
 	"time"
+"text/template"
+	"bytes"
 )
 
+var (
+	data = Data{make(map[string]string)}
+)
 
+type Data struct {
+	Variables map[string]string
+}
 
 func main() {
 	config, err := Config{}.FromYml("config.yml")
@@ -15,23 +23,35 @@ func main() {
 
 
 	ticker := time.NewTicker(config.Interval * time.Second)
-	quit := make(chan struct{})
+
+	for _, metric := range config.Variables {
+		out, err := metric.Value.Run()
+		if err != nil {
+			panic(err)
+		}
+
+		data.Variables[metric.Key] = string(out)
+	}
+
 	func() {
 		for {
 			select {
-			case <- ticker.C:
+			case <-ticker.C:
 				for _, metric := range config.Metric {
 					out, err := metric.Value.Run()
 					if err != nil {
 						panic(err)
 					}
 
-					fmt.Printf("%s %s", metric.Key, out)
-				}
+					tmpl, err := template.New("value").Parse(metric.Key)
+					if err != nil {
+						panic(err)
+					}
+					value := new(bytes.Buffer)
+					err = tmpl.Execute(value, data)
 
-			case <- quit:
-				ticker.Stop()
-				return
+					fmt.Printf("%s %s", value, out)
+				}
 			}
 		}
 	}()

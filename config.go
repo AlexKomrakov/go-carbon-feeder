@@ -7,8 +7,9 @@ import (
 )
 
 type Config struct {
-	Interval time.Duration
-	Metric []Metric
+	Interval  time.Duration
+	Variables []Metric
+	Metric    []Metric
 }
 
 func (c Config) FromYml(file string) (Config, error) {

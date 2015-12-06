@@ -1,12 +1,20 @@
-interval: 10
+interval: 5
+variables:
+  - key: hostname
+    value:
+      name: bash
+      arguments:
+        - -c
+        - hostname | tr "\n" " " | sed 's/ *$//g'
+
 metric:
-  - key: memory_used
+  - key: '{{.Variables.hostname}}.memory_used'
     value:
       name: bash
       arguments:
         - -c
         - free -m | awk 'NR==2{printf "%s\n", $3 }'
-  - key: memory_total
+  - key: '{{.Variables.hostname}}.memory_total'
     value:
       name: bash
       arguments:
