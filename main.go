@@ -6,6 +6,7 @@ import (
 "text/template"
 	"bytes"
 	"regexp"
+	"encoding/json"
 )
 
 var (
@@ -29,10 +30,18 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
+
 		if (metric.Regex != "") {
 			re1 := regexp.MustCompile(metric.Regex)
 			result:= re1.FindAllStringSubmatch(string(out), -1)
 			data.Variables[metric.Key] = result
+		} else if (metric.Json) {
+			var f interface{}
+			err := json.Unmarshal(out, &f)
+			if err != nil {
+				panic(err)
+			}
+			data.Variables[metric.Key] = f
 		} else {
 			data.Variables[metric.Key] = string(out)
 		}

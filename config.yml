@@ -24,8 +24,25 @@ variables:
       name: redis-cli
       arguments:
         - info
+  - key: mongo
+    json: true
+    value:
+      name: mongo
+      arguments:
+        - --quiet
+        - --eval
+        - 'JSON.stringify(db.serverStatus())'
 metric: |
   {{.Variables.hostname}}.memory_used {{.Variables.memory_used}}
   {{.Variables.hostname}}.memory_total {{.Variables.memory_total}}
-  {{range $k, $v := .Variables.redis}}{{$.Variables.hostname}}.{{index $v 1}} {{index $v 2}}
+  {{range $k, $v := .Variables.redis}}{{$.Variables.hostname}}.redis.{{index $v 1}} {{index $v 2}}
+  {{end}}
+
+  {{range $k, $v := .Variables.mongo}}
+    {{range $a, $z := .}}
+    {{$.Variables.hostname}}.mongo.{{$k}}.{{$a}} {{$z}}
+    {{else}}
+      1111
+      {{$.Variables.hostname}}.mongo.{{$k}} {{$v}}
+    {{end}}
   {{end}}
