@@ -9,7 +9,7 @@ import (
 type Config struct {
 	Interval  time.Duration
 	Variables []Metric
-	Metric    []Metric
+	Metric    string
 }
 
 func (c Config) FromYml(file string) (Config, error) {

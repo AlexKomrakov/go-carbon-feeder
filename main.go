@@ -5,14 +5,15 @@ import (
 	"time"
 "text/template"
 	"bytes"
+	"regexp"
 )
 
 var (
-	data = Data{make(map[string]string)}
+	data = Data{make(map[string]interface{})}
 )
 
 type Data struct {
-	Variables map[string]string
+	Variables map[string]interface{}
 }
 
 func main() {
@@ -21,7 +22,6 @@ func main() {
 		panic(err)
 	}
 
-
 	ticker := time.NewTicker(config.Interval * time.Second)
 
 	for _, metric := range config.Variables {
@@ -29,29 +29,27 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-
-		data.Variables[metric.Key] = string(out)
+		if (metric.Regex != "") {
+			re1 := regexp.MustCompile(metric.Regex)
+			result:= re1.FindAllStringSubmatch(string(out), -1)
+			data.Variables[metric.Key] = result
+		} else {
+			data.Variables[metric.Key] = string(out)
+		}
 	}
 
 	func() {
 		for {
 			select {
 			case <-ticker.C:
-				for _, metric := range config.Metric {
-					out, err := metric.Value.Run()
-					if err != nil {
-						panic(err)
-					}
-
-					tmpl, err := template.New("value").Parse(metric.Key)
-					if err != nil {
-						panic(err)
-					}
-					value := new(bytes.Buffer)
-					err = tmpl.Execute(value, data)
-
-					fmt.Printf("%s %s", value, out)
+				tmpl, err := template.New("value").Parse(config.Metric)
+				if err != nil {
+					panic(err)
 				}
+				value := new(bytes.Buffer)
+				err = tmpl.Execute(value, data)
+
+				fmt.Printf("%s", value)
 			}
 		}
 	}()

@@ -6,17 +6,26 @@ variables:
       arguments:
         - -c
         - hostname | tr "\n" " " | sed 's/ *$//g'
-
-metric:
-  - key: '{{.Variables.hostname}}.memory_used'
+  - key: memory_used
     value:
       name: bash
       arguments:
         - -c
-        - free -m | awk 'NR==2{printf "%s\n", $3 }'
-  - key: '{{.Variables.hostname}}.memory_total'
+        - free -m | awk 'NR==2{printf "%s\n", $3 }' | tr "\n" " " | sed 's/ *$//g'
+  - key: memory_total
     value:
       name: bash
       arguments:
         - -c
-        - free -m | awk 'NR==2{printf "%s\n", $2 }'
+        - free -m | awk 'NR==2{printf "%s\n", $2 }' | tr "\n" " " | sed 's/ *$//g'
+  - key: redis
+    regex: '(\w+):([\d\.]+)'
+    value:
+      name: redis-cli
+      arguments:
+        - info
+metric: |
+  {{.Variables.hostname}}.memory_used {{.Variables.memory_used}}
+  {{.Variables.hostname}}.memory_total {{.Variables.memory_total}}
+  {{range $k, $v := .Variables.redis}}{{$.Variables.hostname}}.{{index $v 1}} {{index $v 2}}
+  {{end}}
